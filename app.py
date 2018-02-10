@@ -1,5 +1,6 @@
 from flask import Flask
 from datetime import datetime
+from downloader import main
 app = Flask(__name__)
 
 @app.route('/')
@@ -17,6 +18,8 @@ def homepage():
 @app.route('/download')
 def download():
     the_time = datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
+
+    main()
 
     return """
     <h1>Hello heroku</h1>

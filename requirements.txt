@@ -1,10 +1,2 @@
 Flask
 gunicorn
-urllib
-time
-getopt
-sys
-json
-csv
-os
-multiprocessing
