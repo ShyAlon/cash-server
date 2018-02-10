@@ -1,6 +1,6 @@
 Flask
 gunicorn
-urllib2
+urllib
 time
 getopt
 sys
