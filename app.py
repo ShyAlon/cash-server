@@ -1,7 +1,20 @@
 from flask import Flask
 from datetime import datetime
 from downloader import main
+from multiprocessing import Process, Queue
+
 app = Flask(__name__)
+
+
+def acquire_data():
+    p = Process(target=acquire_data_async)
+    p.start()
+
+def acquire_data_async():
+    try:
+        main()
+    except Exception :
+        print("Failed to acquire data")
 
 @app.route('/')
 def homepage():
@@ -18,13 +31,11 @@ def homepage():
 @app.route('/download')
 def download():
     the_time = datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
-
-    main()
-
+    acquire_data_async()
     return """
     <h1>Hello heroku</h1>
     <h2>It is currently {time}.</h2>
-    <h3>I am downloading data</h3>
+    <h3>Started downloading data</h3>
 
     <img src="http://loremflickr.com/600/400">
     """.format(time=the_time)
