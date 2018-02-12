@@ -31,7 +31,7 @@ def homepage():
 @app.route('/download')
 def download():
     the_time = datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
-    acquire_data_async()
+    acquire_data()
     return """
     <h1>Hello heroku</h1>
     <h2>It is currently {time}.</h2>
