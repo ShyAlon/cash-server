@@ -11,7 +11,7 @@ from db import Database
 API_KEY = '114e933ff74d41b9f4bddeeb74c81ccd&symbol'
 ITERATIONS = 5
 CHUNK_SIZE = 100
-SAMPLES = 2
+SAMPLES = 98
 
 
 def get_data(url, finished, counter):
@@ -58,56 +58,13 @@ def define_url():
 def create_files(urls, symbolList):
     stock_data = []
     stock_data_db = {}
-    timeStamp = time.time()
-    fileNames = []
+    time_stamp = time.time()
     runTime = time.strftime("%Y%m%d-%H%M%S")
-
-    os.makedirs("stockdata/" + runTime)
-
-    for i in range(0, len(symbolList)):
-        fileNames.append("stockdata/" + runTime + "/" + symbolList[i] + runTime + '.csv')
-
-    filedata = {fileName: open(fileName, 'wb') for fileName in fileNames}
-    finished = Queue()
-    processes = []
-    counter = 1
-
-    for i in range(ITERATIONS):
-        p = Process(target=get_data, args=(urls[i], finished, i))
-        p.start()
-        processes.append(p)
-        time.sleep(1)
-
-    while finished.qsize() < ITERATIONS:
-        if counter % 10 == 0:
-            print ("waiting for {} members to finish".format(ITERATIONS - finished.qsize()))
-        counter += 1
-        time.sleep(1)
-
-    print ("done retrieving all urls")
-    for i in range(0, ITERATIONS):
-        stock_data.append(finished.get())
-
-    for process in processes:
-        process.terminate()
-
-    jsons = []
-    # del jsons[:]
-    for i in range(0, ITERATIONS):
-        jsons.append(json.loads(stock_data[i]))
-
-    results = []
-    # del results[:]
-    for i in range(0, ITERATIONS):
-        results.append(jsons[i]["results"])
-
-    writer = {k: csv.writer(filedata[fileNames[k]]) for k in range(0, len(fileNames))}
-    for i in range(0, len(symbolList)):
-        writer[i].writerow(results[0][0].keys())
-        stock_data_db[symbolList[i].replace(".", "_")] = [results[0][0].keys()]
-
-    for sample in range(0, SAMPLES):
+    sample = 0
+    while sample < SAMPLES:
+        time_stamp = time.time()
         finished = Queue()
+        processes = []
         for i in range(ITERATIONS):
             p = Process(target=get_data, args=(urls[i], finished, i))
             p.start()
@@ -117,7 +74,7 @@ def create_files(urls, symbolList):
         counter = 1
         while finished.qsize() < ITERATIONS:
             if counter % 10 == 0:
-                print ("waiting for {} members to finish".format(ITERATIONS - finished.qsize()))
+                print("waiting for {} members to finish".format(ITERATIONS - finished.qsize()))
             counter += 1
             time.sleep(1)
 
@@ -128,36 +85,55 @@ def create_files(urls, symbolList):
         for process in processes:
             process.terminate()
 
-        del jsons[:]
+        jsons = []
         for i in range(0, ITERATIONS):
             jsons.append(json.loads(stock_data[i]))
 
-        del results[:]
+        results = []
+        status = 0
         for i in range(0, ITERATIONS):
-            results.append(jsons[i]["results"])
+            if jsons[i]["status"].values()[1] != 200:
+                print(jsons[i]["status"].values()[0])
+                status += 1
+
+        if status > 0:
+            continue
+        else:
+            for i in range(0, ITERATIONS):
+                results.append(jsons[i]["results"])
+
+        if sample == 0:
+            for j in range(0, len(symbolList)):
+                stock_data_db[symbolList[j].replace(".", "_")] = [results[0][0].keys()]
+        mydb = Database()
+        data_type = "full_single_sample"
 
         for i in range(0, len(results[0])):
             for j in range(0, ITERATIONS):
-                writer[i + j * len(symbolList) / 5].writerow(results[j][i].values())
-                stock_data_db[symbolList[i + j * len(symbolList) / 5].replace(".", "_")].append(results[j][i].values())
+                stock_data_db[results[j][i].values()[23].replace(".", "_")] = results[j][i].values()
 
+        ret_val = {"data_type": data_type, "date_and_time": runTime, "time_stamp": time_stamp, "rows": stock_data_db}
+        mydb.insert_result(ret_val)
+        sample += 1
+        print(sample)
+        time.sleep(20)
         print(sample)
 
-    mydb = Database()
-    data_type = "Raw Stock Data"
-
-    mydb.insert_result({"Data Type": data_type, "Date and Time": runTime, "Time Stamp": timeStamp,
-                        "rows": stock_data_db})
+    # mydb = Database()
+    data_type = "raw_stock_data"
+    ret_val = {"data_type": data_type, "date_and_time": runTime, "time_stamp": time_stamp, "rows": stock_data_db,
+               "samples": SAMPLES}
+    # mydb.insert_result(retVal)
     print("done")
 
-    return timeStamp, runTime, stock_data_db
+    return time_stamp, runTime, ret_val
 
 
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "vhc:", ["help", "characters="])
     except getopth.GetoptError, err:
-        print (str(err))
+        print(str(err))
         sys.exit(2)
     urls, symbolList = define_url()
     create_files(urls, symbolList)
