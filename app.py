@@ -2,6 +2,7 @@ from flask import Flask
 from datetime import datetime
 from downloader import main
 from multiprocessing import Process, Queue
+import traceback
 
 app = Flask(__name__)
 
@@ -15,6 +16,9 @@ def acquire_data_async():
         main()
     except Exception :
         print("Failed to acquire data")
+        print '-' * 60
+        traceback.print_exc(file=sys.stdout)
+        print '-' * 60
 
 @app.route('/')
 def homepage():
