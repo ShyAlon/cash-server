@@ -116,7 +116,7 @@ def create_files(urls, symbolList):
         mydb.insert_result(ret_val)
         sample += 1
         print(sample)
-        time.sleep(280)
+        time.sleep(20)
         print(sample)
 
     # mydb = Database()
