@@ -107,7 +107,8 @@ def create_files(urls, symbolList):
                 stock_data_db[symbolList[j].replace(".", "_")] = [results[0][0].keys()]
         mydb = Database()
         data_type = "full_single_sample"
-
+        runTime = time.strftime("%Y%m%d-%H%M%S")
+        
         for i in range(0, len(results[0])):
             for j in range(0, ITERATIONS):
                 stock_data_db[results[j][i].values()[23].replace(".", "_")] = results[j][i].values()
