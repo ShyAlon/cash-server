@@ -18,6 +18,7 @@ def get_data(url, finished, counter):
     try:
         finished.put(urllib2.urlopen(url).read().strip())
     except Exception:
+        print(0.1)
         print("failed retrieving url {}".format(counter))
         finished.put(0)
     return 0
@@ -74,6 +75,7 @@ def create_files(urls, symbolList):
         counter = 1
         while finished.qsize() < ITERATIONS:
             if counter % 10 == 0:
+                print(0.2)
                 print("waiting for {} members to finish".format(ITERATIONS - finished.qsize()))
             counter += 1
             time.sleep(1)
@@ -93,6 +95,7 @@ def create_files(urls, symbolList):
         status = 0
         for i in range(0, ITERATIONS):
             if int(jsons[i]["status"].values()[1]) != 200:
+                print(0.3)
                 print(jsons[i]["status"].values()[1])
                 status += 1
 
@@ -108,7 +111,7 @@ def create_files(urls, symbolList):
         mydb = Database()
         data_type = "full_single_sample"
         runTime = time.strftime("%Y%m%d-%H%M%S")
-        
+
         for i in range(0, len(results[0])):
             for j in range(0, ITERATIONS):
                 stock_data_db[results[j][i].values()[23].replace(".", "_")] = results[j][i].values()
@@ -116,8 +119,10 @@ def create_files(urls, symbolList):
         ret_val = {"data_type": data_type, "date_and_time": runTime, "time_stamp": time_stamp, "rows": stock_data_db}
         mydb.insert_result(ret_val)
         sample += 1
+        print(0.4)
         print(sample)
-        time.sleep(20)
+        time.sleep(280)
+        print(0.5)
         print(sample)
 
     # mydb = Database()
@@ -125,6 +130,7 @@ def create_files(urls, symbolList):
     ret_val = {"data_type": data_type, "date_and_time": runTime, "time_stamp": time_stamp, "rows": stock_data_db,
                "samples": SAMPLES}
     # mydb.insert_result(retVal)
+    print(0.6)
     print("done")
 
     return time_stamp, runTime, ret_val
@@ -134,6 +140,7 @@ def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "vhc:", ["help", "characters="])
     except getopth.GetoptError, err:
+        print(0.7)
         print(str(err))
         sys.exit(2)
     urls, symbolList = define_url()

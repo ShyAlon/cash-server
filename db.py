@@ -28,6 +28,7 @@ class Database:
 
     def insert_results(self, results):
         result = self.db.results.insert_many(results)
+        print(0.8)
         print (result.inserted_ids)
 
     def read_data(self, index):
@@ -39,6 +40,7 @@ class Database:
             ]):
                 if target >= index:
                     self.data = result
+                    print(0.9)
                     print("Getting result #{}".format(target))
                     return result
                 else:
