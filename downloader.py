@@ -93,7 +93,7 @@ def create_files(urls, symbolList):
         status = 0
         for i in range(0, ITERATIONS):
             if jsons[i]["status"].values()[1] != 200:
-                print(jsons[i]["status"].values()[0])
+                print(jsons[i]["status"].values()[1])
                 status += 1
 
         if status > 0:
