@@ -116,7 +116,11 @@ def create_files(urls, symbolList):
 
         for i in range(0, len(results[0])):
             for j in range(0, ITERATIONS):
-                stock_data_db[results[j][i].values()[23].replace(".", "_")] = results[j][i].values()
+                try:
+                    stock_data_db[results[j][i].values()[23].replace(".", "_")] = results[j][i].values()
+                except err:
+                    print("failed to get asset name")
+                    print(results[j][i].values())
 
         ret_val = {"data_type": data_type, "date_and_time": runTime, "time_stamp": time_stamp, "rows": stock_data_db}
         mydb.insert_result(ret_val)
