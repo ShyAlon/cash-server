@@ -29,7 +29,9 @@ def define_url():
     symbolList = []
     fieldList = []
 
-    with open('resources/field_list.csv', 'rb') as f:
+    print (os.getcwd())
+
+    with open('./resources/field_list.csv', 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
             fieldList.append(row[0])
@@ -37,7 +39,7 @@ def define_url():
     for i in range(0, len(fieldList)):
         fields = fields + fieldList[i] + ','
 
-    with open('resources/snp_constituents.csv', 'rb') as f:
+    with open('./resources/snp_constituents.csv', 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
             symbolList.append(row[0])
@@ -55,24 +57,37 @@ def define_url():
 
     return urls, symbolList
 
-def is_res_success(res):
-    if isinstance(res, basestring):
-        return res.lower().find("success") > -1
-    else:
-        return (int(res) == 200)
 
 def create_files(urls, symbolList):
     stock_data = []
     stock_data_db = {}
     time_stamp = time.time()
     runTime = time.strftime("%Y%m%d-%H%M%S")
-    sample = -1
+    sample = 0
     while sample < SAMPLES:
-        sample += 1
         time_stamp = time.time()
         finished = Queue()
+        processes = []
+        for i in range(ITERATIONS):
+            p = Process(target=get_data, args=(urls[i], finished, i))
+            p.start()
+            processes.append(p)
+            time.sleep(1)
 
-        call_get_data(finished, stock_data, urls)
+        counter = 1
+        while finished.qsize() < ITERATIONS:
+            if counter % 10 == 0:
+                print(0.2)
+                print("waiting for {} members to finish".format(ITERATIONS - finished.qsize()))
+            counter += 1
+            time.sleep(1)
+
+        del stock_data[:]
+        for i in range(0, ITERATIONS):
+            stock_data.append(finished.get())
+
+        for process in processes:
+            process.terminate()
 
         jsons = []
         for i in range(0, ITERATIONS):
@@ -81,15 +96,13 @@ def create_files(urls, symbolList):
         results = []
         status = 0
         for i in range(0, ITERATIONS):
-            res = jsons[i]["status"].values()[1]
-            if is_res_success(res):  # (res == 'Success') or (int(res) != 200):
-                print("Got value #{} for sample {}: {}".format(i, sample, jsons[i]["status"].values()[1]))
+            if int(jsons[i]["status"].values()[1]) != 200:
+                print(0.3)
+                print(jsons[i]["status"].values()[1])
                 status += 1
 
-        if status < ITERATIONS:
-            print ("Failed to get all itereations - got {}".format(status))
+        if status > 0:
             continue
-
         else:
             for i in range(0, ITERATIONS):
                 results.append(jsons[i]["results"])
@@ -103,14 +116,16 @@ def create_files(urls, symbolList):
 
         for i in range(0, len(results[0])):
             for j in range(0, ITERATIONS):
-                if i == 0 and j == 0:
-                    print(results[j][i].values())
                 stock_data_db[results[j][i].values()[23].replace(".", "_")] = results[j][i].values()
 
         ret_val = {"data_type": data_type, "date_and_time": runTime, "time_stamp": time_stamp, "rows": stock_data_db}
         mydb.insert_result(ret_val)
+        sample += 1
+        print(0.4)
+        print(sample)
         time.sleep(280)
-        print("Finished handling sample #{}".format(sample))
+        print(0.5)
+        print(sample)
 
     # mydb = Database()
     data_type = "raw_stock_data"
@@ -121,28 +136,6 @@ def create_files(urls, symbolList):
     print("done")
 
     return time_stamp, runTime, ret_val
-
-
-def call_get_data(finished, stock_data, urls):
-    print("started calling get_data")
-    processes = []
-    for i in range(ITERATIONS):
-        p = Process(target=get_data, args=(urls[i], finished, i))
-        p.start()
-        processes.append(p)
-        time.sleep(1)
-    counter = 1
-    while finished.qsize() < ITERATIONS:
-        if counter % 10 == 0:
-            print("waiting for {} members to finish. Counter {}".format(ITERATIONS - finished.qsize(), counter))
-        counter += 1
-        time.sleep(1)
-    del stock_data[:]
-    for i in range(0, ITERATIONS):
-        stock_data.append(finished.get())
-    for process in processes:
-        process.terminate()
-    print("Finished calling get_data")
 
 
 def main():
