@@ -75,8 +75,7 @@ def create_files(urls, symbolList):
         counter = 1
         while finished.qsize() < ITERATIONS:
             if counter % 10 == 0:
-                print(0.2)
-                print("waiting for {} members to finish".format(ITERATIONS - finished.qsize()))
+                print("waiting for {} members to finish. Counter {}".format(ITERATIONS - finished.qsize(), counter))
             counter += 1
             time.sleep(1)
 
@@ -115,6 +114,8 @@ def create_files(urls, symbolList):
 
         for i in range(0, len(results[0])):
             for j in range(0, ITERATIONS):
+                if i == 0 and j == 0:
+                    print(results[j][i].values())
                 stock_data_db[results[j][i].values()[23].replace(".", "_")] = results[j][i].values()
 
         ret_val = {"data_type": data_type, "date_and_time": runTime, "time_stamp": time_stamp, "rows": stock_data_db}
