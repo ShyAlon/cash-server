@@ -86,8 +86,8 @@ def create_files(urls, symbolList):
                 print("Got value #{} for sample {}: {}".format(i, sample, jsons[i]["status"].values()[1]))
                 status += 1
 
-        if status > 0:
-            print ("Failed with status {}".format(status))
+        if status < ITERATIONS:
+            print ("Failed to get all itereations - got {}".format(status))
             continue
 
         else:
