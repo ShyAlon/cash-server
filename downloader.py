@@ -100,7 +100,7 @@ def create_files(urls, symbolList):
         for i in range(0, ITERATIONS):
             res = jsons[i]["status"].values()[1]
             if is_res_success(res):  # (res == 'Success') or (int(res) != 200):
-                print("Got value #{}: {}".format(i, jsons[i]["status"].values()[1]))
+                print("Got value #{} for sample {}: {}".format(i, sample, jsons[i]["status"].values()[1]))
                 status += 1
 
         if status > 0:
