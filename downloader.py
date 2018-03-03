@@ -55,6 +55,11 @@ def define_url():
 
     return urls, symbolList
 
+def is_res_success(res):
+    if isinstance(res, basestring):
+        return res.lower().find("success") > -1
+    else:
+        return (int(res) == 200)
 
 def create_files(urls, symbolList):
     stock_data = []
@@ -94,9 +99,8 @@ def create_files(urls, symbolList):
         status = 0
         for i in range(0, ITERATIONS):
             res = jsons[i]["status"].values()[1]
-            if (res == 'Success') or (int(res) != 200):
-                print(0.3)
-                print(jsons[i]["status"].values()[1])
+            if is_res_success(res):  # (res == 'Success') or (int(res) != 200):
+                print("Got value #{}: {}".format(i, jsons[i]["status"].values()[1]))
                 status += 1
 
         if status > 0:
