@@ -102,8 +102,8 @@ def create_files(urls, symbolList):
         results = []
         status = 0
         for i in range(0, ITERATIONS):
-            status = jsons[i]["status"].values()[0]
-            if status != "Success." and int(status) != 200:
+            ret = jsons[i]["status"].values()[0]
+            if ret != "Success." and int(status) != 200:
                 print("Failed to get data: {}".format(jsons[i]["status"].values()[1]))
                 status += 1
 
