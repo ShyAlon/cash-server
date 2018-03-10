@@ -12,19 +12,6 @@ class Database:
                         "/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin"
         self.client = pymongo.MongoClient(self.connection_string)
         self.db = self.client.test
-        # self.posts = self.db.posts
-        # for index in range(0, 3):
-        #     post = {"author": "Shy",
-        #             "text": "My first blog post!",
-        #             "tags": ["mongodb", "python", "pymongo"],
-        #             "date": datetime.datetime.utcnow()}
-        #     post_id = posts.insert_one(post).inserted_id
-        #     print(post_id)
-        # self.collections = db.collection_names(include_system_collections=False)
-        # print self.collections
-        # # pprint.pprint(posts.find_one({"author": "Mush"}))
-        # for post in self.posts.find({"author": "Shy"}):
-        #     pprint.pprint(post)
 
     def insert_results(self, results):
         result = self.db.results.insert_many(results)
