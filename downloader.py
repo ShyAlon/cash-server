@@ -16,10 +16,8 @@ SAMPLES = 98
 
 def get_data(url, finished, counter):
     try:
-        print ("Getting data from {}".format(url))
         finished.put(urllib2.urlopen(url).read().strip())
     except Exception:
-        print(0.1)
         print("failed retrieving url {}".format(counter))
         finished.put(0)
     return 0
@@ -29,8 +27,6 @@ def define_url():
     fields = ''
     symbolList = []
     fieldList = []
-
-    print (os.getcwd())
 
     with open('./resources/field_list.csv', 'rb') as f:
         reader = csv.reader(f)
@@ -80,40 +76,52 @@ def create_files(urls, symbolList):
         counter = 1
         while finished.qsize() < ITERATIONS:
             if counter % 10 == 0:
-                print(0.2)
                 print("waiting for {} members to finish".format(ITERATIONS - finished.qsize()))
             counter += 1
             time.sleep(1)
+
+        print ("Finished getting data")
 
         del stock_data[:]
         for i in range(0, ITERATIONS):
             stock_data.append(finished.get())
 
+        print ("Finished appending data")
+
         for process in processes:
             process.terminate()
+
+        print ("Finished terminating processes")
 
         jsons = []
         for i in range(0, ITERATIONS):
             jsons.append(json.loads(stock_data[i]))
 
+        print ("Finished appending jsons")
+
         results = []
         status = 0
         for i in range(0, ITERATIONS):
             if int(jsons[i]["status"].values()[0]) != 200:
-                print(0.3)
-                print(jsons[i]["status"].values()[1])
+                print("Failed to get data: {}".format(jsons[i]["status"].values()[1]))
                 status += 1
 
         if status > 0:
+            print("Skipping iteration due to failure")
             continue
         else:
             for i in range(0, ITERATIONS):
                 results.append(jsons[i]["results"])
 
+        print("All results appended")
+
         if sample == 0:
             for j in range(0, len(symbolList)):
                 stock_data_db[symbolList[j].replace(".", "_")] = [results[0][0].keys()]
         mydb = Database()
+
+        print("Database created")
+
         data_type = "full_single_sample"
         runTime = time.strftime("%Y%m%d-%H%M%S")
 
@@ -128,19 +136,17 @@ def create_files(urls, symbolList):
         ret_val = {"data_type": data_type, "date_and_time": runTime, "time_stamp": time_stamp, "rows": stock_data_db}
         mydb.insert_result(ret_val)
         sample += 1
-        print(0.4)
+        print("Before iteration {} sleep".format(sample))
         print(sample)
         time.sleep(280)
-        print(0.5)
-        print(sample)
+        print("After iteration {} sleep".format(sample))
 
     # mydb = Database()
     data_type = "raw_stock_data"
     ret_val = {"data_type": data_type, "date_and_time": runTime, "time_stamp": time_stamp, "rows": stock_data_db,
                "samples": SAMPLES}
     # mydb.insert_result(retVal)
-    print(0.6)
-    print("done")
+    print("Finished creating files".format(sample))
 
     return time_stamp, runTime, ret_val
 
