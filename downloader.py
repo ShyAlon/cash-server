@@ -108,7 +108,7 @@ def create_files(urls, symbolList):
                 status += 1
 
         if status > 0:
-            print("Skipping iteration due to failure")
+            print("Skipping iteration due to failure. Status {}".format(status))
             continue
         else:
             for i in range(0, ITERATIONS):
