@@ -16,6 +16,7 @@ SAMPLES = 98
 
 def get_data(url, finished, counter):
     try:
+        print ("Getting data from {}".format(url))
         finished.put(urllib2.urlopen(url).read().strip())
     except Exception:
         print(0.1)
@@ -64,11 +65,13 @@ def create_files(urls, symbolList):
     time_stamp = time.time()
     runTime = time.strftime("%Y%m%d-%H%M%S")
     sample = 0
+    print ("starting to create files")
     while sample < SAMPLES:
         time_stamp = time.time()
         finished = Queue()
         processes = []
         for i in range(ITERATIONS):
+            print ("Starting get {}".format(i))
             p = Process(target=get_data, args=(urls[i], finished, i))
             p.start()
             processes.append(p)
