@@ -153,12 +153,12 @@ def create_files(urls, symbolList):
 
 
 def main():
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "vhc:", ["help", "characters="])
-    except getopth.GetoptError, err:
-        print(0.7)
-        print(str(err))
-        sys.exit(2)
+    # try:
+    #     opts, args = getopt.getopt(sys.argv[1:], "vhc:", ["help", "characters="])
+    # except getopth.GetoptError, err:
+    #     print(0.7)
+    #     print(str(err))
+    #     sys.exit(2)
     urls, symbolList = define_url()
     create_files(urls, symbolList)
 
